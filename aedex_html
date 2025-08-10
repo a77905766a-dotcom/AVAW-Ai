@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>مولد صور بالذكاء الاصطناعي</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>توليد صورة بالذكاء الاصطناعي</h1>
+  <textarea id="promptInput" placeholder="اكتب وصف الصورة هنا..."></textarea><br>
+  <button onclick="generateImage()">أنشئ صورة</button>
+
+  <div id="imageResult"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
