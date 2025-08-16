@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AVAW </title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: Tahoma, sans-serif; background:#f9f9f9; margin:0; }
+    header { background:#cc0000; color:white; padding:15px; text-align:center; }
+    .container { padding:20px; max-width:700px; margin:auto; }
+    .post { background:white; padding:15px; border-radius:10px; margin-bottom:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    .post img { width:80px; height:80px; border-radius:50%; }
+    .btn { background:#cc0000; color:white; padding:8px 12px; border:none; border-radius:5px; cursor:pointer; }
+    .btn:hover { background:#a00000; }
+    .fab { position:fixed; bottom:20px; right:20px; background:#cc0000; color:white; border:none; border-radius:50%; width:50px; height:50px; font-size:24px; cursor:pointer; }
+    .form { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.2); }
+    .form input, .form select { width:100%; padding:8px; margin:6px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AVAW</h1>
+  </header>
+
+  <div class="container" id="posts"></div>
+
+  <button class="fab" onclick="toggleForm()">+</button>
+
+  <div class="form" id="form">
+    <h3>إضافة منشور جديد</h3>
+    <input type="text" id="name" placeholder="اسم القناة">
+    <input type="url" id="link" placeholder="رابط القناة">
+    <input type="url" id="contact" placeholder="رابط التواصل">
+    <input type="url" id="image" placeholder="رابط صورة القناة">
+    <select id="lang">
+      <option value="ar">قنوات عربية</option>
+      <option value="en">قنوات أجنبية</option>
+    </select>
+    <select id="subs">
+      <option value="10k">10k+</option>
+      <option value="100k">100k+</option>
+      <option value="1m">1M+</option>
+      <option value="10m">10M+</option>
+    </select>
+    <button class="btn" onclick="addChannel()">نشر</button>
+    <button class="btn" style="background:gray" onclick="toggleForm()">إلغاء</button>
+  </div>
+
+  <script>
+    // ربط Supabase (مجاني)
+    const SUPABASE_URL = "https://vhzoyxdwqzckpxzsqafk.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYXJlZC1rZXkiLCJpYXQiOjE2NzAwMDAwMDAsImV4cCI6MjAwNTU2MDAwMH0.lWKwEN-vhMoxvLmzAov9MPgexwRrJm1lP3jge-8y3Lg";
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function loadChannels() {
+      const { data } = await db.from("channels").select("*").order("id",{ascending:false});
+      const container = document.getElementById("posts");
+      container.innerHTML = "";
+      data.forEach(ch => {
+        container.innerHTML += `
+          <div class="post">
+            <img src="${ch.image}" alt="logo">
+            <h3>${ch.name}</h3>
+            <p>📊 ${ch.subs} | 🌐 ${ch.lang}</p>
+            <button class="btn" onclick="window.open('${ch.link}')">زيارة القناة</button>
+            <button class="btn" onclick="window.open('${ch.contact}')">تواصل</button>
+            <button class="btn" onclick="share('${ch.name}','${ch.link}')">مشاركة</button>
+          </div>
+        `;
+      });
+    }
+
+    async function addChannel() {
+      const name = document.getElementById("name").value;
+      const link = document.getElementById("link").value;
+      const contact = document.getElementById("contact").value;
+      const image = document.getElementById("image").value || "https://via.placeholder.com/80";
+      const lang = document.getElementById("lang").value;
+      const subs = document.getElementById("subs").value;
+
+      await db.from("channels").insert([{ name, link, contact, image, lang, subs }]);
+      toggleForm();
+      loadChannels();
+    }
+
+    function toggleForm() {
+      const f = document.getElementById("form");
+      f.style.display = (f.style.display === "block") ? "none" : "block";
+    }
+
+    function share(name, link) {
+      const text = `شاهد قناة ${name} على يوتيوب: ${link}`;
+      if (navigator.share) {
+        navigator.share({ title: name, text, url: link });
+      } else {
+        alert("انسخ الرابط: " + link);
+      }
+    }
+
+    loadChannels();
+  </script>
+</body>
+</html>
